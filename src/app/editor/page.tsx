@@ -1,7 +1,7 @@
 // src/app/editor/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
@@ -16,10 +16,26 @@ export default function EditorPage() {
   const [error, setError] = useState('');
 
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
+  // Use useEffect for navigation instead of during render
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="max-w-4xl mx-auto py-8 px-4">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  // Return null if not authenticated (will redirect via useEffect)
   if (!user) {
-    router.push('/login');
     return null;
   }
 
@@ -52,7 +68,7 @@ export default function EditorPage() {
           title,
           content,
           excerpt,
-          tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag).join(','), // Convert to comma-separated string
+          tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag).join(','),
           published: isPublished,
           slug: generateSlug(title),
         }),
