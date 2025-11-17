@@ -1,4 +1,4 @@
-
+// src/components/layout/Header.tsx
 'use client';
 
 import Link from 'next/link';
@@ -29,6 +29,13 @@ export default function Header() {
             
             {user ? (
               <div className="flex items-center space-x-4">
+               
+                <Link 
+                  href="/editor" 
+                  className="text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  Write
+                </Link>
                 <Link href="/profile" className="text-gray-600 hover:text-gray-900">
                   Profile
                 </Link>
@@ -49,4 +56,4 @@ export default function Header() {
       </div>
     </header>
   );
-}  
+}
