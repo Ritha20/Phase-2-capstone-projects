@@ -1,15 +1,30 @@
-// src/lib/auth-context.ts - Simplified version
+// src/lib/auth-context.ts
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-const AuthContext = createContext<any>(null);
+interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  username: string | null;
+}
+
+interface AuthContextType {
+  user: User | null;
+  login: (token: string, user: User) => void;
+  logout: () => void;
+  isLoading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check if user is logged in on mount
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
@@ -19,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = (token: string, userData: any) => {
+  const login = (token: string, userData: User) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
@@ -39,5 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }
