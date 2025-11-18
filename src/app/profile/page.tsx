@@ -1,6 +1,7 @@
+// src/app/profile/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
@@ -23,12 +24,15 @@ export default function ProfilePage() {
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     username: '',
     bio: '',
+    avatar: '',
   });
   
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
 
@@ -44,6 +48,7 @@ export default function ProfilePage() {
         name: user.name || '',
         username: user.username || '',
         bio: user.bio || '',
+        avatar: user.avatar || '',
       });
 
       // Load user's posts
@@ -57,11 +62,62 @@ export default function ProfilePage() {
     }
   }, [user, authLoading, router]);
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image must be less than 2MB');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.url) {
+        // Update the avatar in form data
+        setFormData(prev => ({ ...prev, avatar: data.url }));
+      } else {
+        alert(data.error || 'Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     // We'll implement this later - for now just show the UI
     setIsEditing(false);
     alert('Profile update functionality will be added in the next step!');
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   if (authLoading) {
@@ -82,24 +138,55 @@ export default function ProfilePage() {
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-6">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name || 'User'}
-                  className="w-20 h-20 rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-2xl font-bold text-green-600">
-                  {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
-                </span>
+            {/* Avatar Section */}
+            <div className="relative group">
+              <div 
+                className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center overflow-hidden cursor-pointer"
+                onClick={triggerFileInput}
+              >
+                {formData.avatar ? (
+                  <img
+                    src={formData.avatar}
+                    alt={formData.name || 'User'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-3xl font-bold text-green-600">
+                    {formData.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              
+              {/* Upload overlay */}
+              <div 
+                className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                onClick={triggerFileInput}
+              >
+                <span className="text-white text-sm font-medium">Change</span>
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarUpload}
+                accept="image/*"
+                className="hidden"
+              />
+
+              {/* Uploading indicator */}
+              {isUploading && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                  <div className="text-white text-sm">Uploading...</div>
+                </div>
               )}
             </div>
+
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {user.name || 'Anonymous User'}
+                {formData.name || 'Anonymous User'}
               </h1>
-              <p className="text-gray-600">@{user.username || 'no-username'}</p>
+              <p className="text-gray-600">@{formData.username || 'no-username'}</p>
               <p className="text-gray-500 mt-1">{user.email}</p>
             </div>
           </div>
@@ -125,7 +212,7 @@ export default function ProfilePage() {
             />
           ) : (
             <p className="text-gray-600">
-              {user.bio || 'No bio yet. Share something about yourself!'}
+              {formData.bio || 'No bio yet. Share something about yourself!'}
             </p>
           )}
         </div>
@@ -173,6 +260,51 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
+            
+            {/* Avatar Upload in Edit Mode */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Profile Picture
+              </label>
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div 
+                    className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center overflow-hidden cursor-pointer"
+                    onClick={triggerFileInput}
+                  >
+                    {formData.avatar ? (
+                      <img
+                        src={formData.avatar}
+                        alt={formData.name || 'User'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xl font-bold text-green-600">
+                        {formData.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleAvatarUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    onClick={triggerFileInput}
+                    className="px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm"
+                  >
+                    Change Photo
+                  </button>
+                  <p className="text-xs text-gray-500 mt-1">JPG, PNG up to 2MB</p>
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
