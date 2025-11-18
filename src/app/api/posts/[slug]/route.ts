@@ -3,16 +3,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/jwt';
 
-
+// GET - Get single post
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    // Await the params first
+    const { slug } = await params;
+    
+    console.log('🔍 API: Fetching post with slug:', slug);
+    
     const post = await prisma.post.findUnique({
       where: {
-        slug: params.slug,
-        published: true,
+        slug: slug,
       },
       include: {
         author: {
@@ -39,30 +43,35 @@ export async function GET(
     );
   }
 }
-//PUT Updating post
+
+// PUT - Update post
 export async function PUT(
-    request: NextRequest,
-    { params }: { params: { slug: string } }
-  ) {
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    // Await the params first
+    const { slug } = await params;
+    
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.substring(7);
+    let decoded;
+    
     try {
-      const authHeader = request.headers.get('authorization');
-      if (!authHeader?.startsWith('Bearer ')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-  
-      const token = authHeader.substring(7);
-      let decoded;
-      
-      try {
-        decoded = verifyToken(token);
-      } catch (error) {
-        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-      }
-  
-      const { title, content, excerpt, tags, published } = await request.json();
-    //   Check if post exists and user is author
+      decoded = verifyToken(token);
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    const { title, content, excerpt, tags, published } = await request.json();
+
+    // Check if post exists and user is author
     const existingPost = await prisma.post.findUnique({
-      where: { slug: params.slug },
+      where: { slug: slug },
       include: { author: true }
     });
 
@@ -75,7 +84,7 @@ export async function PUT(
     }
 
     const post = await prisma.post.update({
-      where: { slug: params.slug },
+      where: { slug: slug },
       data: {
         title,
         content,
@@ -106,51 +115,53 @@ export async function PUT(
   }
 }
 
-//DELETE - POST
-
+// DELETE - Delete post
 export async function DELETE(
-    request: NextRequest,
-    { params }: { params: { slug: string } }
-  ) {
-    try {
-      const authHeader = request.headers.get('authorization');
-      if (!authHeader?.startsWith('Bearer ')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-  
-      const token = authHeader.substring(7);
-      let decoded;
-      
-      try {
-        decoded = verifyToken(token);
-      } catch (error) {
-        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-      }
-  
-      // Check if post exists and user is author
-      const existingPost = await prisma.post.findUnique({
-        where: { slug: params.slug },
-        include: { author: true }
-      });
-  
-      if (!existingPost) {
-        return NextResponse.json({ error: 'Post not found' }, { status: 404 });
-      }
-  
-      if (existingPost.authorId !== decoded.userId) {
-        return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
-      }
-  
-      await prisma.post.delete({
-        where: { slug: params.slug },
-      });
-  
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      console.error('Delete post error:', error);
-      return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      );
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    // Await the params first
+    const { slug } = await params;
+    
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const token = authHeader.substring(7);
+    let decoded;
+    
+    try {
+      decoded = verifyToken(token);
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    // Check if post exists and user is author
+    const existingPost = await prisma.post.findUnique({
+      where: { slug: slug },
+      include: { author: true }
+    });
+
+    if (!existingPost) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    if (existingPost.authorId !== decoded.userId) {
+      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+    }
+
+    await prisma.post.delete({
+      where: { slug: slug },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Delete post error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
+}

@@ -1,50 +1,93 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 
 async function getPost(slug: string) {
   try {
+    console.log('🔍 Fetching post from API:', slug);
     const response = await fetch(`/api/posts/${slug}`, {
       cache: 'no-store',
     });
     
+    console.log('📡 API response status:', response.status);
+    
     if (!response.ok) {
+      console.log('❌ API response not OK:', response.status);
       return null;
     }
     
     const data = await response.json();
+    console.log('✅ API response data:', data);
     return data.post;
   } catch (error) {
-    console.error('Error fetching post:', error);
+    console.error('💥 Error fetching post:', error);
     return null;
   }
 }
 
-export default function PostPage() {
+// Fix: Use the proper Next.js pattern for dynamic routes
+export default function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const [post, setPost] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [slug, setSlug] = useState<string>('');
   const router = useRouter();
-  const params = useParams();
   const { user } = useAuth();
 
-  const slug = params.slug as string;
+  useEffect(() => {
+    // Properly unwrap the params Promise
+    const unwrapParams = async () => {
+      const resolvedParams = await params;
+      console.log('📝 Resolved params:', resolvedParams);
+      setSlug(resolvedParams.slug);
+    };
+    
+    unwrapParams();
+  }, [params]);
 
   useEffect(() => {
+    if (!slug) return;
+
     const loadPost = async () => {
+      console.log('🚀 Loading post with slug:', slug);
       const postData = await getPost(slug);
+      console.log('📦 Post data received:', postData);
+      
       if (!postData) {
-        router.push('/');
+        console.log('❌ No post data, but continuing for debugging');
+        // Set some dummy data so we can see the page
+        setPost({ 
+          title: 'DEBUG POST - Post not found', 
+          content: 'This post could not be loaded', 
+          author: { id: 'debug', name: 'Debug Author' },
+          slug: slug,
+          createdAt: new Date().toISOString()
+        });
+        setIsLoading(false);
         return;
       }
+      
+      console.log('🎉 Post loaded successfully:', postData.title);
       setPost(postData);
       setIsLoading(false);
     };
 
     loadPost();
   }, [slug, router]);
+
+  useEffect(() => {
+    console.log('=== DEBUG POST PAGE ===');
+    console.log('Current user:', user);
+    console.log('Post data:', post);
+    if (post) {
+      console.log('Post author ID:', post.author?.id);
+      console.log('User ID:', user?.id);
+      console.log('Can edit?', user && user.id === post.author?.id);
+    }
+    console.log('=== END DEBUG ===');
+  }, [user, post]);
 
   if (isLoading) {
     return (
