@@ -105,3 +105,52 @@ export async function PUT(
     );
   }
 }
+
+//DELETE - POST
+
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: { slug: string } }
+  ) {
+    try {
+      const authHeader = request.headers.get('authorization');
+      if (!authHeader?.startsWith('Bearer ')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+  
+      const token = authHeader.substring(7);
+      let decoded;
+      
+      try {
+        decoded = verifyToken(token);
+      } catch (error) {
+        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      }
+  
+      // Check if post exists and user is author
+      const existingPost = await prisma.post.findUnique({
+        where: { slug: params.slug },
+        include: { author: true }
+      });
+  
+      if (!existingPost) {
+        return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+      }
+  
+      if (existingPost.authorId !== decoded.userId) {
+        return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+      }
+  
+      await prisma.post.delete({
+        where: { slug: params.slug },
+      });
+  
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error('Delete post error:', error);
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      );
+    }
+  }
