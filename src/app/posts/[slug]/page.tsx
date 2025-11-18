@@ -1,10 +1,13 @@
-// src/app/posts/[slug]/page.tsx
-import { notFound } from 'next/navigation';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth-context';
 
 async function getPost(slug: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${slug}`, {
+    const response = await fetch(`/api/posts/${slug}`, {
       cache: 'no-store',
     });
     
@@ -20,11 +23,43 @@ async function getPost(slug: string) {
   }
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug);
+export default function PostPage() {
+  const [post, setPost] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const params = useParams();
+  const { user } = useAuth();
+
+  const slug = params.slug as string;
+
+  useEffect(() => {
+    const loadPost = async () => {
+      const postData = await getPost(slug);
+      if (!postData) {
+        router.push('/');
+        return;
+      }
+      setPost(postData);
+      setIsLoading(false);
+    };
+
+    loadPost();
+  }, [slug, router]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
 
   if (!post) {
-    notFound();
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">Post not found</div>
+      </div>
+    );
   }
 
   return (
@@ -83,6 +118,18 @@ export default async function PostPage({ params }: { params: { slug: string } })
             </div>
           )}
         </header>
+
+        {/* Edit Post Button - Only shows for post author */}
+        {user && user.id === post.author.id && (
+          <div className="mb-6 flex space-x-4">
+            <Link
+              href={`/posts/${post.slug}/edit`}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+              Edit Post
+            </Link>
+          </div>
+        )}
 
         {/* Post Content */}
         <div 
