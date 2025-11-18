@@ -1,6 +1,8 @@
 // src/app/api/posts/[slug]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyToken } from '@/lib/jwt';
+
 
 export async function GET(
   request: NextRequest,
@@ -37,3 +39,24 @@ export async function GET(
     );
   }
 }
+//PUT Updating post
+export async function PUT(
+    request: NextRequest,
+    { params }: { params: { slug: string } }
+  ) {
+    try {
+      const authHeader = request.headers.get('authorization');
+      if (!authHeader?.startsWith('Bearer ')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+  
+      const token = authHeader.substring(7);
+      let decoded;
+      
+      try {
+        decoded = verifyToken(token);
+      } catch (error) {
+        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      }
+  
+      const { title, content, excerpt, tags, published } = await request.json();
