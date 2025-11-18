@@ -60,3 +60,48 @@ export async function PUT(
       }
   
       const { title, content, excerpt, tags, published } = await request.json();
+    //   Check if post exists and user is author
+    const existingPost = await prisma.post.findUnique({
+      where: { slug: params.slug },
+      include: { author: true }
+    });
+
+    if (!existingPost) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    if (existingPost.authorId !== decoded.userId) {
+      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+    }
+
+    const post = await prisma.post.update({
+      where: { slug: params.slug },
+      data: {
+        title,
+        content,
+        excerpt,
+        tags,
+        published,
+        publishedAt: published ? new Date() : existingPost.publishedAt,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ post });
+  } catch (error) {
+    console.error('Update post error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
