@@ -4,14 +4,17 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/jwt';
 
 // GET - Fetch posts (with optional published filter)
+// In the GET function, add author filter support:
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const published = searchParams.get('published');
+    const author = searchParams.get('author'); // Add this line
     
     const posts = await prisma.post.findMany({
       where: {
         ...(published === 'true' ? { published: true } : {}),
+        ...(author ? { authorId: author } : {}), // Add this filter
       },
       include: {
         author: {
