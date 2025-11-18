@@ -1,3 +1,4 @@
+// src/app/api/search/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -6,9 +7,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
 
+    console.log('🔍 Search query:', query);
+
     if (!query || query.length < 2) {
+      console.log(' Query too short');
       return NextResponse.json({ posts: [] });
     }
+
+    console.log('Searching for posts with query:', query);
 
     const posts = await prisma.post.findMany({
       where: {
@@ -33,8 +39,11 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: 'desc',
       },
-      take: 10, // Limit results
+      take: 10,
     });
+
+    console.log('Search results found:', posts.length);
+    console.log('Results:', posts.map(p => ({ title: p.title, published: p.published })));
 
     return NextResponse.json({ posts });
   } catch (error) {

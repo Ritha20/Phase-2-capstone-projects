@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import SearchBar from '@/components/search/SearchBar';
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -27,9 +28,13 @@ export default function Header() {
               About
             </Link>
             
+            {/* Add Search Bar */}
+            <div className="hidden md:block">
+              <SearchBar />
+            </div>
+            
             {user ? (
               <div className="flex items-center space-x-4">
-               
                 <Link 
                   href="/editor" 
                   className="text-gray-600 hover:text-gray-900 font-medium"
