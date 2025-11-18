@@ -1,4 +1,3 @@
-// src/app/posts/[slug]/edit/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,20 +5,21 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
 
-async function getPost(slug: string) {
+async function getPost(slug: string) {    
   const response = await fetch(`/api/posts/${slug}`);
   if (!response.ok) {
     throw new Error('Post not found');
-  }
+  }            
   const data = await response.json();
   return data.post;
 }
 
-export default function EditPostPage({ params }: { params: { slug: string } }) {
+export default function EditPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [tags, setTags] = useState('');
+  const [image, setImage] = useState('');
   const [isPublished, setIsPublished] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPost, setIsLoadingPost] = useState(true);
@@ -29,15 +29,21 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) {
-      router.push('/login');
-      return;
-    }
+    // Await the params first
+    const loadParamsAndPost = async () => {
+      const { slug } = await params;
+      
+      if (!user) {
+        router.push('/login');
+        return;
+      }
 
-    // Load post data
-    const loadPost = async () => {
+      // Load post data
       try {
-        const post = await getPost(params.slug);
+        console.log('📝 Loading post for editing:', slug);
+        const post = await getPost(slug);
+        
+        console.log('📝 Post data loaded:', post);
         
         // Check if user is the author
         if (post.author.id !== user.id) {
@@ -45,20 +51,42 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
           return;
         }
 
+        // Pre-fill the form with existing data
         setTitle(post.title);
         setContent(post.content);
         setExcerpt(post.excerpt || '');
         setTags(post.tags || '');
+        setImage(post.image || '');
         setIsPublished(post.published);
+        
+        console.log('✅ Form pre-filled with:', {
+          title: post.title,
+          contentLength: post.content.length,
+          excerpt: post.excerpt,
+          tags: post.tags
+        });
+        
         setIsLoadingPost(false);
       } catch (error) {
+        console.error('❌ Error loading post:', error);
         setError('Post not found');
         setIsLoadingPost(false);
       }
     };
 
-    loadPost();
-  }, [params.slug, user, router]);
+    loadParamsAndPost();
+  }, [params, user, router]);
+
+  useEffect(() => {
+    console.log('📝 Edit form data:', {
+      title,
+      contentLength: content.length,
+      excerpt,
+      tags,
+      image,
+      isPublished
+    });
+  }, [title, content, excerpt, tags, image, isPublished]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +100,8 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
     }
 
     try {
-      const response = await fetch(`/api/posts/${params.slug}`, {
+      const { slug } = await params;
+      const response = await fetch(`/api/posts/${slug}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -83,6 +112,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
           content,
           excerpt,
           tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag).join(','),
+          image,
           published: isPublished,
         }),
       });
@@ -90,7 +120,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
       const data = await response.json();
 
       if (response.ok) {
-        router.push(`/posts/${params.slug}`);
+        router.push(`/posts/${slug}`);
       } else {
         setError(data.error || 'Failed to update post');
       }
@@ -107,7 +137,8 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
     }
 
     try {
-      const response = await fetch(`/api/posts/${params.slug}`, {
+      const { slug } = await params;
+      const response = await fetch(`/api/posts/${slug}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -131,7 +162,7 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
   if (isLoadingPost) {
     return (
       <div className="max-w-4xl mx-auto py-8 px-4">
-        <div className="text-center">Loading...</div>
+        <div className="text-center">Loading post...</div>
       </div>
     );
   }
@@ -190,6 +221,25 @@ export default function EditPostPage({ params }: { params: { slug: string } }) {
             placeholder="rwanda, culture, travel, food..."
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
+        </div>
+
+        <div>
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
+            Featured Image URL (Optional)
+          </label>
+          <input
+            type="text"
+            id="image"
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+            placeholder="https://example.com/image.jpg"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          {image && (
+            <div className="mt-2">
+              <img src={image} alt="Preview" className="w-32 h-32 object-cover rounded" />
+            </div>
+          )}
         </div>
 
         <div>

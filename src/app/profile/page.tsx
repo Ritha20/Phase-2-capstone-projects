@@ -62,6 +62,11 @@ export default function ProfilePage() {
     }
   }, [user, authLoading, router]);
 
+  useEffect(() => {
+    console.log('Current avatar URL:', formData.avatar);
+    console.log('User avatar from auth:', user?.avatar);
+  }, [formData.avatar, user?.avatar]);
+
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -111,9 +116,40 @@ export default function ProfilePage() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    // We'll implement this later - for now just show the UI
-    setIsEditing(false);
-    alert('Profile update functionality will be added in the next step!');
+    setIsLoading(true);
+  
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          username: formData.username,
+          bio: formData.bio,
+          avatar: formData.avatar,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Update the auth context with new user data
+        
+        alert('Profile updated successfully!');
+        window.location.reload();
+      } else {
+        alert(data.error || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+      alert('Failed to update profile');
+    } finally {
+      setIsLoading(false);
+      setIsEditing(false);
+    }
   };
 
   const triggerFileInput = () => {
