@@ -3,6 +3,42 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/jwt';
 
+// GET - Fetch posts (with optional published filter)
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const published = searchParams.get('published');
+    
+    const posts = await prisma.post.findMany({
+      where: {
+        ...(published === 'true' ? { published: true } : {}),
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatar: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return NextResponse.json({ posts });
+  } catch (error) {
+    console.error('Get posts error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+// POST - Create new post (keep your existing POST function)
+
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
@@ -33,7 +69,7 @@ export async function POST(request: NextRequest) {
         title,
         content,
         excerpt,
-        tags, // This is now a string (comma-separated)
+        tags, 
         published,
         slug,
         authorId: decoded.userId,
@@ -60,3 +96,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

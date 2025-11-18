@@ -13,7 +13,7 @@ async function getPosts() {
     
     const data = await response.json();
     return data.posts || [];
-  } catch (error) {
+  } catch (error) {    
     console.error('Error fetching posts:', error);
     return [];
   }
