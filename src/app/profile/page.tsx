@@ -1,10 +1,12 @@
 // src/app/profile/page.tsx
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
+import { useFollow } from '@/hooks/useFollow';
 
 async function getUserPosts(userId: string) {
   try {
@@ -34,7 +36,10 @@ export default function ProfilePage() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, token } = useAuth();
+
+  // Use follow hook for the current user's stats
+  const { data: followData, isLoading: followLoading } = useFollow(user?.id, token || undefined);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -253,18 +258,22 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Stats */}
+        {/* Stats - UPDATED WITH FOLLOW DATA */}
         <div className="flex space-x-8 text-center">
           <div>
             <p className="text-2xl font-bold text-gray-900">{userPosts.length}</p>
             <p className="text-gray-600">Posts</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">0</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {followLoading ? '...' : (followData?.followersCount ?? 0)}
+            </p>
             <p className="text-gray-600">Followers</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">0</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {followLoading ? '...' : (followData?.followingCount ?? 0)}
+            </p>
             <p className="text-gray-600">Following</p>
           </div>
         </div>

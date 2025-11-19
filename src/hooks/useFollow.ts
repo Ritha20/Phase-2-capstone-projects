@@ -1,5 +1,4 @@
-//src/hooks/useFollows.ts
-
+// src/hooks/useFollows.ts
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api-client';
 
@@ -15,7 +14,7 @@ export function useFollow(targetUserId: string | undefined, token?: string | nul
 
   const query = useQuery({
     queryKey: ['follow', targetUserId],
-    enabled: Boolean(targetUserId),
+    enabled: Boolean(targetUserId && token), // Only fetch if we have a user and token
     queryFn: async () => {
       if (!targetUserId) throw new Error('Missing user id');
       const data = await apiFetch<FollowResponse>(`/api/users/${targetUserId}/follow`, {
@@ -36,6 +35,8 @@ export function useFollow(targetUserId: string | undefined, token?: string | nul
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['follow', targetUserId] });
+      // Also invalidate user profile queries
+      queryClient.invalidateQueries({ queryKey: ['profile', targetUserId] });
     },
   });
 
@@ -45,4 +46,3 @@ export function useFollow(targetUserId: string | undefined, token?: string | nul
     isUpdating: mutation.isPending,
   };
 }
-
