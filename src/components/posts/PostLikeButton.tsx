@@ -1,9 +1,10 @@
-// src/components/posts/PostLikeButton.tsx - UPDATED:
+// src/components/posts/PostLikeButton.tsx
 'use client';
 
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { usePostLikes } from '@/hooks/useLikes';
 
 interface PostLikeButtonProps {
   slug: string;
@@ -12,26 +13,38 @@ interface PostLikeButtonProps {
 export default function PostLikeButton({ slug }: PostLikeButtonProps) {
   const router = useRouter();
   const { user, token } = useAuth();
+  const {
+    data,
+    isLoading,
+    toggleLike,
+    isToggling,
+  } = usePostLikes(slug, token || undefined);
 
-  const handleLike = useCallback(async () => {
+  const handleToggle = useCallback(async () => {
     if (!user) {
       router.push('/login');
       return;
     }
+    await toggleLike();
+  }, [router, toggleLike, user]);
 
-    // Simple like implementation - you can connect to your API later
-    console.log('Liked post:', slug);
-    alert('Like functionality - connect to your API');
-  }, [router, user, slug]);
+  const likeCount = data?.likeCount ?? 0;
+  const userLiked = data?.userLiked ?? false;
 
   return (
     <button
       type="button"
-      onClick={handleLike}
-      className="flex items-center gap-2 rounded-full border px-5 py-2 text-sm font-semibold transition border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+      onClick={handleToggle}
+      disabled={isLoading || isToggling}
+      className={`flex items-center gap-2 rounded-full border px-5 py-2 text-sm font-semibold transition ${
+        userLiked
+          ? 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100'
+          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+      } ${(isLoading || isToggling) ? 'opacity-60 cursor-not-allowed' : ''}`}
+      aria-pressed={userLiked}
     >
       <svg
-        className="h-5 w-5"
+        className={`h-5 w-5 ${userLiked ? 'fill-rose-600' : ''}`}
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={2}
@@ -43,7 +56,7 @@ export default function PostLikeButton({ slug }: PostLikeButtonProps) {
           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
         />
       </svg>
-      <span>Like</span>
+      <span>{likeCount} {likeCount === 1 ? 'like' : 'likes'}</span>
     </button>
   );
 }

@@ -1,5 +1,4 @@
-//src/hooks/useLikes.ts
-
+// src/hooks/useLikes.ts
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api-client';
 
@@ -46,6 +45,9 @@ export function usePostLikes(slug: string | undefined, token?: string | null) {
     },
   });
 
-  return { ...query, toggleLike: mutation.mutateAsync, isToggling: mutation.isPending };
+  return { 
+    ...query, 
+    toggleLike: mutation.mutateAsync, 
+    isToggling: mutation.isPending 
+  };
 }
-

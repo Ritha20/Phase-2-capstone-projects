@@ -19,6 +19,10 @@ interface Post {
     username: string;
     avatar: string;
   };
+  _count?: {
+    likes: number;
+    comments: number;
+  };
 }
 
 export default function Home() {
@@ -38,11 +42,13 @@ export default function Home() {
           setPosts(data.posts);
           setFilteredPosts(data.posts);
           
-          // Extract all unique tags
-          const tags = data.posts.flatMap((post: Post) => 
-            post.tags ? post.tags.split(',').map((tag: string) => tag.trim()) : []
-          );
-          const uniqueTags = Array.from(new Set(tags)).filter(tag => tag.length > 0);
+          
+          const tags = data.posts.flatMap((post: Post) => {
+            if (!post.tags) return [];
+            return post.tags.split(',').map((tag: string) => tag.trim()).filter(tag => tag.length > 0);
+          });
+          
+          const uniqueTags = Array.from(new Set(tags));
           setAllTags(uniqueTags as string[]);
         }
       } catch (error) {
@@ -59,12 +65,18 @@ export default function Home() {
     if (selectedTag === 'all') {
       setFilteredPosts(posts);
     } else {
-      const filtered = posts.filter(post => 
-        post.tags && post.tags.split(',').map(tag => tag.trim()).includes(selectedTag)
-      );
+      const filtered = posts.filter(post => {
+        if (!post.tags) return false;
+        const postTags = post.tags.split(',').map(tag => tag.trim());
+        return postTags.includes(selectedTag);
+      });
       setFilteredPosts(filtered);
     }
   }, [selectedTag, posts]);
+
+  const handleTagClick = (tag: string) => {
+    setSelectedTag(tag.trim());
+  };
 
   if (isLoading) {
     return (
@@ -169,10 +181,18 @@ export default function Home() {
                   </div>
                 )}
                 <div className="p-6">
+                  {/* UPDATED: Added like count to post metadata */}
                   <div className="flex items-center text-sm text-gray-500 mb-2">
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                     <span className="mx-2">•</span>
                     <span>{post.author.name || 'Anonymous'}</span>
+                    <span className="mx-2">•</span>
+                    <span className="flex items-center gap-1">
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                      {post._count?.likes || 0}
+                    </span>
                   </div>
                   
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -190,16 +210,13 @@ export default function Home() {
                   {post.tags && (
                     <div className="flex flex-wrap gap-1 mb-4">
                       {post.tags.split(',').slice(0, 3).map((tag: string) => (
-                        <span
+                        <button
                           key={tag}
-                          className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setSelectedTag(tag.trim());
-                          }}
+                          onClick={() => handleTagClick(tag)}
+                          className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded hover:bg-green-200 transition-colors"
                         >
                           {tag.trim()}
-                        </span>
+                        </button>
                       ))}
                     </div>
                   )}

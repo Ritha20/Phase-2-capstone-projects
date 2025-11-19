@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import CommentsSection from '@/components/comments/CommentsSection';
+import PostLikeButton from '@/components/posts/PostLikeButton';
 
 async function getPost(slug: string) {
   try {
@@ -175,6 +176,10 @@ export default function PostPage({ params }: { params: Promise<{ slug: string }>
             </Link>
           </div>
         )}
+
+         <div className="mb-6">
+           <PostLikeButton slug={slug} />
+         </div>
 
         {/* Post Content */}
         <div 
