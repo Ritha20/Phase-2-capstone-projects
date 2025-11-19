@@ -1,3 +1,4 @@
+// src/app/posts/[slug]/edit/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';

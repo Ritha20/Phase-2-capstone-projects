@@ -5,6 +5,7 @@ import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { AuthProvider } from '@/lib/auth-context';
+import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,13 +22,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <Header />
-          <main className="min-h-screen bg-gray-50">
-            {children}
-          </main>
-          <Footer />
-        </AuthProvider>
+        <ReactQueryProvider>
+          <AuthProvider>
+            <Header />
+            <main className="min-h-screen bg-gray-50">
+              {children}
+            </main>
+            <Footer />
+          </AuthProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

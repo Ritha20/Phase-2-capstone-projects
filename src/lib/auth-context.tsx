@@ -1,4 +1,4 @@
-// src/lib/auth-context.ts
+// src/lib/auth-context.ts - UPDATED VERSION:
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -8,10 +8,13 @@ interface User {
   email: string;
   name: string | null;
   username: string | null;
+  bio?: string | null;
+  avatar?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (token: string, user: User) => void;
   logout: () => void;
   isLoading: boolean;
@@ -21,33 +24,37 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const token = localStorage.getItem('token');
+    const storedToken = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
-    if (token && userData) {
+    if (storedToken && userData) {
+      setToken(storedToken);
       setUser(JSON.parse(userData));
     }
     setIsLoading(false);
   }, []);
 
-  const login = (token: string, userData: User) => {
-    localStorage.setItem('token', token);
+  const login = (newToken: string, userData: User) => {
+    localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
+    setToken(newToken);
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    setToken(null);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
