@@ -6,7 +6,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
-import { useFollow } from '@/hooks/useFollow';
 
 async function getUserPosts(userId: string) {
   try {
@@ -27,6 +26,11 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [stats, setStats] = useState({
+    followersCount: 0,
+    followingCount: 0,
+  });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -36,10 +40,7 @@ export default function ProfilePage() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { user, isLoading: authLoading, token } = useAuth();
-
-  // Use follow hook for the current user's stats
-  const { data: followData, isLoading: followLoading } = useFollow(user?.id, token || undefined);
+  const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -63,26 +64,38 @@ export default function ProfilePage() {
         setIsLoading(false);
       };
 
+      // Load user stats
+      const loadStats = async () => {
+        try {
+          const response = await fetch(`/api/users/${user.id}/stats`);
+          if (response.ok) {
+            const data = await response.json();
+            setStats({
+              followersCount: data.followersCount,
+              followingCount: data.followingCount,
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching stats:', error);
+        } finally {
+          setIsLoadingStats(false);
+        }
+      };
+
       loadUserPosts();
+      loadStats();
     }
   }, [user, authLoading, router]);
-
-  useEffect(() => {
-    console.log('Current avatar URL:', formData.avatar);
-    console.log('User avatar from auth:', user?.avatar);
-  }, [formData.avatar, user?.avatar]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
 
-    // Validate file size (2MB max)
     if (file.size > 2 * 1024 * 1024) {
       alert('Image must be less than 2MB');
       return;
@@ -102,7 +115,6 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (response.ok && data.url) {
-        // Update the avatar in form data
         setFormData(prev => ({ ...prev, avatar: data.url }));
       } else {
         alert(data.error || 'Failed to upload image');
@@ -112,7 +124,6 @@ export default function ProfilePage() {
       alert('Failed to upload image');
     } finally {
       setIsUploading(false);
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -141,8 +152,6 @@ export default function ProfilePage() {
       const data = await response.json();
   
       if (response.ok) {
-        // Update the auth context with new user data
-        
         alert('Profile updated successfully!');
         window.location.reload();
       } else {
@@ -179,7 +188,6 @@ export default function ProfilePage() {
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-6">
-            {/* Avatar Section */}
             <div className="relative group">
               <div 
                 className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center overflow-hidden cursor-pointer"
@@ -198,7 +206,6 @@ export default function ProfilePage() {
                 )}
               </div>
               
-              {/* Upload overlay */}
               <div 
                 className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 onClick={triggerFileInput}
@@ -206,7 +213,6 @@ export default function ProfilePage() {
                 <span className="text-white text-sm font-medium">Change</span>
               </div>
 
-              {/* Hidden file input */}
               <input
                 type="file"
                 ref={fileInputRef}
@@ -215,7 +221,6 @@ export default function ProfilePage() {
                 className="hidden"
               />
 
-              {/* Uploading indicator */}
               {isUploading && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                   <div className="text-white text-sm">Uploading...</div>
@@ -240,7 +245,6 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Bio */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">About</h3>
           {isEditing ? (
@@ -258,7 +262,7 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Stats - UPDATED WITH FOLLOW DATA */}
+        {/* UPDATED STATS SECTION WITH REAL DATA */}
         <div className="flex space-x-8 text-center">
           <div>
             <p className="text-2xl font-bold text-gray-900">{userPosts.length}</p>
@@ -266,19 +270,18 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-900">
-              {followLoading ? '...' : (followData?.followersCount ?? 0)}
+              {isLoadingStats ? '...' : stats.followersCount}
             </p>
             <p className="text-gray-600">Followers</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-900">
-              {followLoading ? '...' : (followData?.followingCount ?? 0)}
+              {isLoadingStats ? '...' : stats.followingCount}
             </p>
             <p className="text-gray-600">Following</p>
           </div>
         </div>
 
-        {/* Edit Form */}
         {isEditing && (
           <form onSubmit={handleUpdateProfile} className="mt-6 space-y-4 border-t pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -306,7 +309,6 @@ export default function ProfilePage() {
               </div>
             </div>
             
-            {/* Avatar Upload in Edit Mode */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Profile Picture

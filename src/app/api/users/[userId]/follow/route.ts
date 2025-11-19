@@ -3,62 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/jwt';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ userId: string }> }
-) {
-  try {
-    const { userId } = await params;
-    const authHeader = request.headers.get('authorization');
-    
-    let currentUserId: string | null = null;
-
-    // Get current user from token if provided
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      try {
-        const decoded = verifyToken(token);
-        currentUserId = decoded.userId;
-      } catch (error) {
-        // Token invalid, but we still return public data
-      }
-    }
-
-    // Get follow stats
-    const [followersCount, followingCount, isFollowing] = await Promise.all([
-      // Followers count
-      prisma.follow.count({
-        where: { followingId: userId },
-      }),
-      // Following count
-      prisma.follow.count({
-        where: { followerId: userId },
-      }),
-      // Check if current user is following this user
-      currentUserId ? prisma.follow.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId: currentUserId,
-            followingId: userId,
-          },
-        },
-      }) : Promise.resolve(null),
-    ]);
-
-    return NextResponse.json({
-      isFollowing: !!isFollowing,
-      followersCount,
-      followingCount,
-    });
-  } catch (error) {
-    console.error('Get follow status error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
@@ -72,32 +16,8 @@ export async function POST(
     }
 
     const token = authHeader.substring(7);
-    let decoded;
-    
-    try {
-      decoded = verifyToken(token);
-    } catch (error) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
+    const decoded = verifyToken(token);
     const currentUserId = decoded.userId;
-
-    // Can't follow yourself
-    if (currentUserId === targetUserId) {
-      return NextResponse.json(
-        { error: 'Cannot follow yourself' },
-        { status: 400 }
-      );
-    }
-
-    // Check if target user exists
-    const targetUser = await prisma.user.findUnique({
-      where: { id: targetUserId },
-    });
-
-    if (!targetUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
 
     // Check if already following
     const existingFollow = await prisma.follow.findUnique({
@@ -109,45 +29,31 @@ export async function POST(
       },
     });
 
-    let action: 'followed' | 'unfollowed';
-
     if (existingFollow) {
-      // Unfollow: Remove the follow
+      // Unfollow
       await prisma.follow.delete({
-        where: {
-          id: existingFollow.id,
-        },
+        where: { id: existingFollow.id },
       });
-      action = 'unfollowed';
+      return NextResponse.json({ 
+        action: 'unfollowed',
+        isFollowing: false 
+      });
     } else {
-      // Follow: Create new follow
+      // Follow
       await prisma.follow.create({
         data: {
           followerId: currentUserId,
           followingId: targetUserId,
         },
       });
-      action = 'followed';
+      return NextResponse.json({ 
+        action: 'followed',
+        isFollowing: true 
+      });
     }
 
-    // Get updated counts
-    const [followersCount, followingCount] = await Promise.all([
-      prisma.follow.count({
-        where: { followingId: targetUserId },
-      }),
-      prisma.follow.count({
-        where: { followerId: targetUserId },
-      }),
-    ]);
-
-    return NextResponse.json({
-      action,
-      isFollowing: action === 'followed',
-      followersCount,
-      followingCount,
-    });
   } catch (error) {
-    console.error('Toggle follow error:', error);
+    console.error('Follow error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

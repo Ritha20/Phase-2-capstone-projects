@@ -1,11 +1,12 @@
 // src/app/posts/[slug]/page.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
-import CommentsSection from '@/components/comments/CommentsSection';
+import FollowButton from '@/components/FollowButton';
 import PostLikeButton from '@/components/posts/PostLikeButton';
 
 async function getPost(slug: string) {
@@ -31,7 +32,6 @@ async function getPost(slug: string) {
   }
 }
 
-// Fix: Use the proper Next.js pattern for dynamic routes
 export default function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const [post, setPost] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -177,9 +177,10 @@ export default function PostPage({ params }: { params: Promise<{ slug: string }>
           </div>
         )}
 
-         <div className="mb-6">
-           <PostLikeButton slug={slug} />
-         </div>
+        {/* LIKE BUTTON - Shows for all logged-in users */}
+        <div className="mb-6">
+          <PostLikeButton slug={post.slug} />
+        </div>
 
         {/* Post Content */}
         <div 
@@ -204,15 +205,22 @@ export default function PostPage({ params }: { params: Promise<{ slug: string }>
               </div>
             </div>
             
-            <Link
-              href="/"
-              className="text-green-600 hover:text-green-700 font-medium"
-            >
-              ← Back to all posts
-            </Link>
+            <div className="flex items-center space-x-4">
+              {/* FOLLOW BUTTON ADDED HERE */}
+              <FollowButton 
+                userId={post.author.id} 
+                userName={post.author.name || 'this author'} 
+              />
+              
+              <Link
+                href="/"
+                className="text-green-600 hover:text-green-700 font-medium"
+              >
+                ← Back to all posts
+              </Link>
+            </div>
           </div>
         </footer>
-        <CommentsSection slug={slug} />
       </article>
     </div>
   );
