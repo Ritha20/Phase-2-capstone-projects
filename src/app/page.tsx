@@ -1,9 +1,9 @@
 // src/app/page.tsx
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+// import {post,User} from "@types"
 interface Post {
   id: string;
   title: string;
