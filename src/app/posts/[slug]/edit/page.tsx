@@ -191,7 +191,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter your post title..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg font-medium"
+            className="w-full px-4 py-3 border text-black rounded-lg focus:ring-green-500 focus:border-transparent font-medium"
             required
           />
         </div>
@@ -206,7 +206,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
             onChange={(e) => setExcerpt(e.target.value)}
             placeholder="Brief description of your post..."
             rows={3}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-4 py-3 border text-black border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500"
           />
         </div>
 
@@ -220,7 +220,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="rwanda, culture, travel, food..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
           />
         </div>
 
@@ -234,7 +234,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
             value={image}
             onChange={(e) => setImage(e.target.value)}
             placeholder="https://example.com/image.jpg"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
           {image && (
             <div className="mt-2">
