@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
-import SearchBar from '@/components/search/SearchBar';
+import SearchBar from '../search/SearchBar';
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -13,50 +13,69 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="shadow-sm border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-xl font-bold text-green-800">
-            Ikaze
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="text-2xl font-bold font-serif text-green-800 hover:text-green-800 transition-colors">
+              Ikaze
+            </span>
           </Link>
+          <SearchBar />
 
-          <nav className="flex space-x-8 items-center">
-            <Link href="/" className="text-gray-600 hover:text-gray-900">
+          {/* Navigation */}
+          <nav className="flex items-center space-x-6">
+            <Link 
+              href="/" 
+              className="text-black hover:text-green-700 font-medium transition-colors"
+            >
               Home
             </Link>
-            <Link href="/about" className="text-gray-600 hover:text-gray-900">
+            <Link 
+              href="/about" 
+              className="text-black hover:text-green-700 font-medium transition-colors"
+            >
               About
             </Link>
             
-            {/* Add Search Bar */}
-            <div className="hidden md:block">
-              <SearchBar />
-            </div>
-            
             {user ? (
-              <div className="flex items-center space-x-4">
+              <>
                 <Link 
                   href="/editor" 
-                  className="text-gray-600 hover:text-gray-900 font-medium"
+                  className="bg-green-600 text-black px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
                 >
                   Write
                 </Link>
-                <Link href="/profile" className="text-gray-600 hover:text-gray-900">
+                <Link 
+                  href="/profile" 
+                  className="text-black hover:text-green-700 font-medium transition-colors"
+                >
                   Profile
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-black hover:text-gray-700 transition-colors text-sm"
                 >
                   Logout
                 </button>
-              </div>
+              </>
             ) : (
-              <Link href="/login" className="text-gray-600 hover:text-gray-900">
+              <Link 
+                href="/login" 
+                className="bg-green-600 text-black px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+              >
                 Sign In
               </Link>
             )}
           </nav>
+        </div>
+        
+        
+        <div className="pb-4">
+          <div className="max-w-md">
+            
+          </div>
         </div>
       </div>
     </header>

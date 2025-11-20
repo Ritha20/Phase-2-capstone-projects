@@ -87,31 +87,72 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="mx-auto sm:px-4 lg:px-6 py-20">
       {/* Hero Section */}
-      <section className="text-center mb-16">
-        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-          Welcome to <span className="text-green-800">Ikaze</span>
+      
+<section className="mb-16">
+  <div className="max-w-7xl mx-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-30 items-center">
+      {/* Left Side - Text Content */}
+      <div className="space-y-6">
+        <h1 className="text-4xl font-serif tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+          Welcome To <span className="text-green-800 font-mono">Ikaze</span>
         </h1>
-        <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-          Discover and share stories about the vibrant culture, food, travel, and daily life in Rwanda.
+        <p className=" text-gray-600 md:text-xl max-w-2xl font-">
+          Discover and share stories about the vibrant culture, food, travel, and daily life in Rwanda. 
+          Join our community of passionate storytellers and explorers.
         </p>
-        <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-          <div className="rounded-md shadow">
-            <Link
-              href="/signup"
-              className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10"
-            >
-              Get Started
-            </Link>
+        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <Link
+            href="/signup"
+            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-8 transition-colors"
+          >
+            Start 
+          </Link>
+          <Link
+            href="/about"
+            className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-8 transition-colors"
+          >
+            Learn More
+          </Link>
+        </div>
+        
+        {/* Stats */}
+        <div className="flex space-x-8 pt-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-900">100+</div>
+            <div className="text-sm text-gray-600">Stories</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-900">50+</div>
+            <div className="text-sm text-gray-600">Writers</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-900">1K+</div>
+            <div className="text-sm text-gray-600">Readers</div>
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* Right Side - Image */}
+      <div className="relative group">
+  <div className="w-full h-72 lg:h-[500px] rounded-2xl overflow-hidden shadow-xl">
+    <img
+      src="Rwanda.jpg"
+      alt="Rwanda Culture and Lifestyle"
+      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+    />
+  </div>
+        
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Tags Filter */}
       {allTags.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Filter by Tags</h2>
+        <section className="mb-8 px-10">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 ">Filter by Tags</h2>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedTag('all')}
@@ -181,12 +222,11 @@ export default function Home() {
                   </div>
                 )}
                 <div className="p-6">
-                  {/* UPDATED: Added like count to post metadata */}
+                  {/* Added like count to post metadata */}
                   <div className="flex items-center text-sm text-gray-500 mb-2">
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                    <span className="mx-2">•</span>
-                    <span>{post.author.name || 'Anonymous'}</span>
-                    <span className="mx-2">•</span>
+                    
+                    <span className="mx-2 ml-auto"></span>
                     <span className="flex items-center gap-1">
                       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -221,12 +261,17 @@ export default function Home() {
                     </div>
                   )}
                   
+                  
                   <Link
                     href={`/posts/${post.slug}`}
                     className="text-green-600 hover:text-green-700 font-medium"
                   >
                     Read more →
                   </Link>
+                  <div className="py-7 text-black">
+                  <span className="">Author: </span>
+                    <span>{post.author.name || 'Anonymous'}</span>
+                    </div>
                 </div>
               </article>
             ))}
