@@ -1,5 +1,4 @@
 // src/app/api/search/debug/route.ts
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -33,7 +32,7 @@ export async function GET() {
       console.log('---');
     });
 
-    // 2. Test specific searches
+    // 2. Test specific searches - FIXED QUERIES
     const testQueries = ['cooking', 'Cooking', 'travel', 'rwanda', 'test'];
     
     for (const query of testQueries) {
@@ -43,10 +42,10 @@ export async function GET() {
         where: {
           published: true,
           OR: [
-            { title: { contains: query, mode: 'insensitive' } },
-            { excerpt: { contains: query, mode: 'insensitive' } },
-            { content: { contains: query, mode: 'insensitive' } },
-            { tags: { contains: query, mode: 'insensitive' } },
+            { title: { contains: query } },
+            { excerpt: { contains: query } },
+            { content: { contains: query } },
+            { tags: { contains: query } },
           ],
         },
         select: { title: true, tags: true }

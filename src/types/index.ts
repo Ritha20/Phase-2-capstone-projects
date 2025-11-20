@@ -1,4 +1,3 @@
-// src/types/index.ts - COMPREHENSIVE VERSION
 export interface User {
   id: string;
   email: string;
