@@ -90,7 +90,7 @@ export default function EditorPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Create New Post</h1>
+      <h1 className="text-3xl text-green-950 font-serif mb-6">Create New Post</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -101,11 +101,11 @@ export default function EditorPage() {
             type="text"
             id="title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter your post title..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg font-medium"
-            required
-          />
+           onChange={(e) => setTitle(e.target.value)}
+           placeholder="Enter your post title..."
+           className="w-full px-4 text-black py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg font-medium"
+           required
+/>
         </div>
 
         <div>
@@ -118,8 +118,7 @@ export default function EditorPage() {
             onChange={(e) => setExcerpt(e.target.value)}
             placeholder="Brief description of your post..."
             rows={3}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
+            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"/>
         </div>
 
         <div>
@@ -131,9 +130,8 @@ export default function EditorPage() {
             id="tags"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
-            placeholder="rwanda, culture, travel, food..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
+            placeholder="Rwanda, culture, travel, food..."
+            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"/>
         </div>
 
         <div>

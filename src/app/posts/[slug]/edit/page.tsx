@@ -171,7 +171,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Edit Post</h1>
+        <h1 className="text-3xl text-green-900 font-serif">Edit Post</h1>
         <button
           onClick={handleDelete}
           className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
@@ -191,7 +191,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter your post title..."
-            className="w-full px-4 py-3 border text-black rounded-lg focus:ring-green-500 focus:border-transparent font-medium"
+            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-transparent"
             required
           />
         </div>
@@ -206,8 +206,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
             onChange={(e) => setExcerpt(e.target.value)}
             placeholder="Brief description of your post..."
             rows={3}
-            className="w-full px-4 py-3 border text-black border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500"
-          />
+            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-transparent"/>
         </div>
 
         <div>
@@ -220,8 +219,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="rwanda, culture, travel, food..."
-            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
-          />
+            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-transparent"/>
         </div>
 
         <div>
@@ -234,8 +232,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
             value={image}
             onChange={(e) => setImage(e.target.value)}
             placeholder="https://example.com/image.jpg"
-            className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
+            className="w-full px-4 py-3 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-transparent"/>
           {image && (
             <div className="mt-2">
               <img src={image} alt="Preview" className="w-32 h-32 object-cover rounded" />

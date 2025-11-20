@@ -114,7 +114,7 @@ export default function PostPage({ params }: { params: Promise<{ slug: string }>
         <header className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center text-green-600 hover:text-green-700 mb-6"
+            className="inline-flex items-center text-green-800 hover:text-green-900 mb-6"
           >
             ← Back to home
           </Link>
@@ -169,7 +169,7 @@ export default function PostPage({ params }: { params: Promise<{ slug: string }>
           <div className="mb-6 flex space-x-4">
             <Link
               href={`/posts/${post.slug}/edit`}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              className="px-4 py-2 bg-green-800 text-white rounded-md hover:bg-green-700"
             >
               Edit Post
             </Link>
@@ -183,7 +183,7 @@ export default function PostPage({ params }: { params: Promise<{ slug: string }>
 
         {/* Post Content */}
         <div 
-          className="prose prose-lg max-w-none mb-12"
+          className="prose prose-lg max-w-none text-black mb-12"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
@@ -213,7 +213,7 @@ export default function PostPage({ params }: { params: Promise<{ slug: string }>
               
               <Link
                 href="/"
-                className="text-green-600 hover:text-green-700 font-medium"
+                className="text-green-800 hover:text-green-900 font-medium"
               >
                 ← Back to all posts
               </Link>
