@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-// import {post,User} from "@types"
+
 interface Post {
   id: string;
   title: string;
@@ -25,12 +25,96 @@ interface Post {
   };
 }
 
+// Carousel component
+function Carousel({ images, interval = 2000 }: { images: string[]; interval?: number }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prevIndex) => 
+        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+      );
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [images.length, interval]);
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  const goToPrevious = () => {
+    setCurrentIndex(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
+  };
+
+  const goToNext = () => {
+    setCurrentIndex(currentIndex === images.length - 1 ? 0 : currentIndex + 1);
+  };
+
+  return (
+    <div className="relative w-full h-full group">
+      {/* Main Image */}
+      <div className="w-full h-72 lg:h-[500px] rounded-2xl overflow-hidden shadow-xl">
+        <img
+          src={images[currentIndex]}
+          alt={`Slide ${currentIndex + 1}`}
+          className="w-full h-full object-cover object-center transition-transform duration-500 ease-in-out"
+        />
+      </div>
+
+      {/* Navigation Arrows */}
+      <button
+        onClick={goToPrevious}
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      
+      <button
+        onClick={goToNext}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      {/* Dots Indicator */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {images.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => goToSlide(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              index === currentIndex ? 'bg-white' : 'bg-white/50'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const carouselImages = [
+  'Rwanda.jpg',
+  'Rwanda Culture.jpg', 
+  'Rwandans.jpeg',
+  'Rwanda restaurant.webp',
+  'tourism.webp',
+  'Food.jpg',
+  'nature.jpg',
+  'animals.jpeg'
+];
+
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [allTags, setAllTags] = useState<string[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -59,7 +143,7 @@ export default function Home() {
     };
 
     fetchPosts();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     if (selectedTag === 'all') {
@@ -88,77 +172,69 @@ export default function Home() {
 
   return (
     <div className="mx-auto sm:px-4 lg:px-6 py-20">
-      {/* Hero Section */}
-      
-<section className="mb-16">
-  <div className="max-w-7xl mx-auto">
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-30 items-center">
-      {/* Left Side - Text Content */}
-      <div className="space-y-6">
-        <h1 className="text-4xl font-serif tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-          Welcome To <span className="text-green-800 font-mono">Ikaze</span>
-        </h1>
-        <p className=" text-gray-600 md:text-xl max-w-2xl font-">
-          Discover and share stories about the vibrant culture, food, travel, and daily life in Rwanda. 
-          Join our community of passionate storytellers and explorers.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <Link
-            href="/signup"
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-8 transition-colors"
-          >
-            Start 
-          </Link>
-          <Link
-            href="/about"
-            className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-8 transition-colors"
-          >
-            Learn More
-          </Link>
-        </div>
-        
-        {/* Stats */}
-        <div className="flex space-x-8 pt-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">100+</div>
-            <div className="text-sm text-gray-600">Stories</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">50+</div>
-            <div className="text-sm text-gray-600">Writers</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">1K+</div>
-            <div className="text-sm text-gray-600">Readers</div>
-          </div>
-        </div>
-      </div>
+      {/* Hero Section with Carousel */}
+      <section className="mb-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-30 items-center">
+            {/* Left Side - Text Content */}
+            <div className="space-y-6">
+              <h1 className="text-4xl font-serif tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+                Welcome To <span className="text-green-800 font-mono">Ikaze</span>
+              </h1>
+              <p className="text-gray-600 md:text-xl max-w-2xl">
+                Discover and share stories about the vibrant culture, food, travel, and daily life in Rwanda. 
+                Join our community of passionate storytellers and explorers.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center justify-center px-2 py-5 border border-transparent text-base font-medium rounded-4xl text-white bg-green-800 hover:bg-green-900 md:py-2 md:text-lg md:px-4 transition-colors"
+                >
+                  Start Reading
+                </Link>
+                <Link
+                  href="/about"
+                  className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-8 transition-colors"
+                >
+                  Learn More
+                </Link>
+              </div>
+              
+              {/* Stats */}
+              <div className="flex space-x-8 pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">100+</div>
+                  <div className="text-sm text-gray-600">Stories</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">50+</div>
+                  <div className="text-sm text-gray-600">Writers</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">1K+</div>
+                  <div className="text-sm text-gray-600">Readers</div>
+                </div>
+              </div>
+            </div>
 
-      {/* Right Side - Image */}
-      <div className="relative group">
-  <div className="w-full h-72 lg:h-[500px] rounded-2xl overflow-hidden shadow-xl">
-    <img
-      src="Rwanda.jpg"
-      alt="Rwanda Culture and Lifestyle"
-      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-    />
-  </div>
-        
-      </div>
-    </div>
-  </div>
-</section>
+            {/* Right Side - Carousel */}
+            <div className="relative group">
+              <Carousel images={carouselImages} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Tags Filter */}
       {allTags.length > 0 && (
         <section className="mb-8 px-10">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 ">Filter by Tags</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Filter by Tags</h2>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedTag('all')}
               className={`px-4 py-2 rounded-full text-sm font-medium ${
                 selectedTag === 'all'
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-green-700 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -170,7 +246,7 @@ export default function Home() {
                 onClick={() => setSelectedTag(tag)}
                 className={`px-4 py-2 rounded-full text-sm font-medium ${
                   selectedTag === tag
-                    ? 'bg-green-600 text-white'
+                    ? 'bg-green-800 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -187,9 +263,17 @@ export default function Home() {
           <h2 className="text-2xl font-bold text-gray-900">
             {selectedTag === 'all' ? 'Latest Stories' : `Posts tagged: ${selectedTag}`}
           </h2>
-          <span className="text-gray-500">
-            {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}
-          </span>
+          <div className="flex items-center space-x-4">
+            <span className="text-gray-500">
+              {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}
+            </span>
+            <button
+              onClick={() => setRefreshKey(prev => prev + 1)}
+              className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200 transition-colors"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
         
         {filteredPosts.length === 0 ? (
@@ -222,7 +306,7 @@ export default function Home() {
                   </div>
                 )}
                 <div className="p-6">
-                  {/* Added like count to post metadata */}
+                
                   <div className="flex items-center text-sm text-gray-500 mb-2">
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                     

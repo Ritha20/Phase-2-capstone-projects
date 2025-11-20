@@ -4,17 +4,16 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/jwt';
 
 // GET - Fetch posts (with optional published filter)
-// In the GET function, add author filter support:
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const published = searchParams.get('published');
-    const author = searchParams.get('author'); // Add this line
+    const author = searchParams.get('author');
     
     const posts = await prisma.post.findMany({
       where: {
         ...(published === 'true' ? { published: true } : {}),
-        ...(author ? { authorId: author } : {}), // Add this filter
+        ...(author ? { authorId: author } : {}),
       },
       include: {
         author: {
@@ -23,6 +22,13 @@ export async function GET(request: NextRequest) {
             name: true,
             username: true,
             avatar: true,
+          },
+        },
+        
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
           },
         },
       },
@@ -40,8 +46,8 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-// POST - Create new post (keep your existing POST function)
 
+// POST - Creating new post (keep your existing POST function)
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
@@ -87,6 +93,13 @@ export async function POST(request: NextRequest) {
             avatar: true,
           },
         },
+        // ADD THIS TO POST RESPONSE TOO:
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
       },
     });
 
@@ -99,4 +112,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

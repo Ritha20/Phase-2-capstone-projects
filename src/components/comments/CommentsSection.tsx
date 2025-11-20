@@ -29,8 +29,8 @@ export default function CommentsSection({ slug }: CommentsSectionProps) {
   }
 
   return (
-    <div className="mt-12 border-t pt-8">
-      <h3 className="text-2xl font-bold text-gray-900 mb-6">
+    <div className="mt-12 border-t text-black pt-8">
+      <h3 className="text-2xl font-bold text-black mb-6">
         Discussion ({comments?.length || 0})
       </h3>
 

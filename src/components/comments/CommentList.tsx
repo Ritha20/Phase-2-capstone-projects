@@ -18,7 +18,7 @@ export default function CommentList({
   currentUser,
   isSubmittingReply 
 }: CommentListProps) {
-  // Group comments by parent (simple flat comments for now)
+  // Group comments by parent
   const topLevelComments = comments.filter(comment => !comment.parentId);
 
   if (comments.length === 0) {

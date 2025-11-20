@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import FollowButton from '@/components/FollowButton';
 import PostLikeButton from '@/components/posts/PostLikeButton';
+import CommentsSection from '@/components/comments/CommentsSection';
 
 async function getPost(slug: string) {
   try {
@@ -220,6 +221,7 @@ export default function PostPage({ params }: { params: Promise<{ slug: string }>
             </div>
           </div>
         </footer>
+        <CommentsSection slug={slug}/>
       </article>
     </div>
   );

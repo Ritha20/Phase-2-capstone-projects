@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "type-check": "tsc --noEmit", 
+    "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format:check": "prettier --check ."
@@ -21,6 +21,8 @@
     "cloudinary": "^2.8.0",
     "dotenv": "^17.2.3",
     "easymde": "^2.20.0",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "jodit": "^4.7.9",
     "jodit-react": "^5.2.38",
     "jsonwebtoken": "^9.0.2",
