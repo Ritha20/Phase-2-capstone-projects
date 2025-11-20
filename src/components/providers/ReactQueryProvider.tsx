@@ -6,7 +6,6 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 interface Props {
   children: ReactNode;
@@ -29,7 +28,6 @@ export function ReactQueryProvider({ children }: Props) {
   return (
     <QueryClientProvider client={client}>
       {children}
-      {process.env.NODE_ENV !== 'production' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );
 }

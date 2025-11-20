@@ -54,7 +54,7 @@ function Carousel({ images, interval = 2000 }: { images: string[]; interval?: nu
   return (
     <div className="relative w-full h-full group">
       {/* Main Image */}
-      <div className="w-full h-72 lg:h-[500px] rounded-2xl overflow-hidden shadow-xl">
+      <div className="w-full h-76 lg:h-[600px] rounded-2xl overflow-hidden shadow-xl">
         <img
           src={images[currentIndex]}
           alt={`Slide ${currentIndex + 1}`}
