@@ -55,9 +55,9 @@ export default function Login() {
 
   return (
     <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold text-center mb-6">Sign In</h1>
+      <h1 className="text-2xl font-bold text-green-800 text-center mb-6">Sign In</h1>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 text-black">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email
@@ -74,7 +74,7 @@ export default function Login() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-sm text-black font-medium text-gray-700">
             Password
           </label>
           <input
