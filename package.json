@@ -6,14 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "type-check": "tsc --noEmit", 
     "format": "prettier --write .",
-    "lint:fix": "next lint --fix",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format:check": "prettier --check ."
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@supabase/supabase-js": "^2.83.0",
     "@tanstack/react-query": "^5.90.10",
     "@tanstack/react-query-devtools": "^5.90.2",
     "bcryptjs": "^3.0.3",
