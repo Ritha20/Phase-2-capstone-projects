@@ -1,4 +1,3 @@
-// jest.config.js
 const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({
@@ -8,7 +7,7 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jsdom',
-  moduleNameMapping: {  // FIXED: Changed from moduleNameMapping to moduleNameMapping
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
