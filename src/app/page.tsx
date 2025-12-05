@@ -100,11 +100,11 @@ function Carousel({ images, interval = 2000 }: { images: string[]; interval?: nu
 const carouselImages = [
   'Rwanda.jpg',
   'Rwanda Culture.jpg', 
-  'Rwandans.jpeg',
+  'Rwandans.jpeg',              
   'Rwanda restaurant.webp',
-  'tourism.webp',
+  'tourism.webp',           
   'Food.jpg',
-  'nature.jpg',
+  'nature.jpg',           
   'animals.jpeg'
 ];
 
@@ -148,7 +148,7 @@ export default function Home() {
   useEffect(() => {
     if (selectedTag === 'all') {
       setFilteredPosts(posts);
-    } else {
+    } else {       
       const filtered = posts.filter(post => {
         if (!post.tags) return false;
         const postTags = post.tags.split(',').map(tag => tag.trim());

@@ -34,7 +34,7 @@ export function usePosts(params?: UsePostsParams, token?: string | null) {
       }
 
       if (params?.includeDrafts) {
-        search.set('includeDrafts', 'true');
+        search.set('includeDrafts', 'true');    
       }
 
       const queryString = search.toString();
